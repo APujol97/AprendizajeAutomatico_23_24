@@ -10,9 +10,11 @@ from PIL import Image
 
 
 # Función para cargar y redimensionar una imagen
-def resizeImage(imagen_path, newSize=(100, 100)):
-    img = Image.open(imagen_path).resize(newSize)
-    return np.array(img)
+def resizeImage(imagen_path):
+    img = Image.open(imagen_path)
+    img_new = Image.new(img.mode, (411, 411), 255)
+    img_new.paste(img, img.getbbox())
+    return np.array(img_new)
 
 
 # Función para calcular las características HOG de una imagen
@@ -27,11 +29,13 @@ def GetHogFeatures(imagen):
 
 
 # Ruta de la carpeta "train"
-train_path = "a2/data/train"
+train_path = "data/train"
 
 # Listas para almacenar las características HOG y sus respectivas etiquetas
 features = []
 labels = []
+max_width = 0
+max_length = 0
 
 # Recorrer las carpetas en la carpeta "train"
 for carpeta in os.listdir(train_path):
@@ -64,18 +68,18 @@ X_train_hog, X_test_hog, y_train_hog, y_test_hog = train_test_split(df_hog["Feat
                                                                     random_state=42)
 
 # Estandarizar los datos
-scaler = StandardScaler()
-X_train_hog_scaled = scaler.fit_transform(X_train_hog)
-X_test_hog_scaled = scaler.transform(X_test_hog)
+#scaler = StandardScaler()
+#X_train_hog_scaled = scaler.fit_transform(X_train_hog)
+#X_test_hog_scaled = scaler.transform(X_test_hog)
 
 # Crear un modelo SVM lineal
 modelo_svm_hog = SVC(kernel='linear')
 
 # Entrenar el modelo
-modelo_svm_hog.fit(X_train_hog_scaled, y_train_hog)
+modelo_svm_hog.fit(X_train_hog, y_train_hog)
 
 # Predecir las etiquetas en el conjunto de prueba
-y_pred_hog = modelo_svm_hog.predict(X_test_hog_scaled)
+y_pred_hog = modelo_svm_hog.predict(X_test_hog)
 
 # Calcular la precisión del modelo
 precision_hog = accuracy_score(y_test_hog, y_pred_hog)
@@ -84,4 +88,6 @@ precision_hog = accuracy_score(y_test_hog, y_pred_hog)
 print(f"Precisión del modelo SVM lineal con características HOG: {precision_hog}")
 
 # Me sale precision de 0.613333333 resize 100x100
+
+# me sale precisión de 0.6966666666666667 con un padding de 411x411 y sin Scaler
 
