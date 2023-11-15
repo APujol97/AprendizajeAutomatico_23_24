@@ -9,12 +9,20 @@ from skimage.feature import hog
 from sklearn.preprocessing import StandardScaler
 from PIL import Image
 
-intial_time = time.time()
+initial_time = time.time()
 
 # Función para cargar y redimensionar una imagen
-def resizeImage(imagen_path, newSize=(150, 150)):
-    img = Image.open(imagen_path).resize(newSize)
-    return np.array(img)
+def resizeImage(image_path, newSize=(400, 400)):
+    img = Image.open(image_path).resize(newSize, Image.NEAREST) # NEAREST indica que se hace el resize sin crear un marco blanco o negro, se aumenta la imagen
+    img_array = np.array(img).flatten()
+
+    if len(img_array.shape) == 3:
+        # Si la imagen es a color, convertir a escala de grises y luego extraer características
+        gray_img = np.array(img.convert("L"))
+    else:
+        gray_img = np.array(img)
+
+    return gray_img
 
 
 # Función para calcular las características HOG de una imagen
@@ -134,7 +142,7 @@ print(f"Precisión del modelo SVM con características HOG: {precision_hog}")
 
 final_time = time.time()
 
-execution_time = final_time - intial_time
+execution_time = final_time - initial_time
 
 print(f"Tiempo de ejecución: {execution_time} segundos")
 
@@ -144,6 +152,10 @@ print(f"Tiempo de ejecución: {execution_time} segundos")
 # Mejores parámetros: {'C': 10, 'gamma': 'scale', 'kernel': 'rbf'}
 # Precisión del modelo SVM con características HOG: 0.5633333333333334
 
-# Mejores parámetros: {'C': 10, 'coef0': 0.0, 'gamma': 'scale', 'kernel': 'sigmoid'}
+# Mejores parámetros: {'C': 10, 'coef0': 0.0, 'gamma': 'scale', 'kernel': 'sigmoid'} (150x150) sin escala grises
 # Precisión del modelo SVM con características HOG: 0.5933333333333334
 # Tiempo de ejecución: 4207.495000123978 segundos (1h 10m 8s)
+
+# Mejores parámetros: {'C': 10, 'coef0': 1.0, 'gamma': 'auto', 'kernel': 'sigmoid'} (400x400) con escala de grises
+# Precisión del modelo SVM con características HOG: 0.66
+# Tiempo de ejecución: 39854.49985194206 segundos (11h 4m 14s)
