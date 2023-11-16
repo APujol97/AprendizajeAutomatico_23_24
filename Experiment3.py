@@ -1,18 +1,16 @@
 import os
 import pandas as pd
 import numpy as np
-import time
 from image_processor import ImageProcessor
 from svm_trainer import SVMTrainer
 
 
-class Experiment2:
+class Experiment3:
 
     def __init__(self, train_path):
         self.train_path = train_path
 
     def run_experiment(self):
-        initial_time = time.time()
 
         # Listas para almacenar las características HOG y sus respectivas etiquetas
         allFeatures = []
@@ -30,10 +28,10 @@ class Experiment2:
                     image_path = os.path.join(folder_path, image)
 
                     # Cargar y redimensionar la imagen a escala de grises
-                    img_array = ImageProcessor.resize_image(image_path, (200, 200)) # TODO: size
+                    img_array = ImageProcessor.resize_image(image_path, (100, 100))  # TODO: ajustar if needed
 
                     # Calcular las características HOG de la imagen
-                    hog_features = ImageProcessor.get_hog_features(img_array, 8, (4, 4))    # TODO: Optimal parameters
+                    hog_features = ImageProcessor.get_hog_features(img_array, 8, (4, 4))  # TODO: ajustar
 
                     # Calcular las características GLCM de la imagen
                     glcm_features = ImageProcessor.get_glcm_features(img_array)
@@ -50,10 +48,16 @@ class Experiment2:
 
         print(df.head())
 
+        SVMTrainer.svm_rbf(df, plotReport=True)
 
-        SVMTrainer.svm_gridSearch(df, initial_time)
+        # HOG + GCLM + LBP
+        # StandardScaler
+        # Accuracy: 0.553333333
 
+        # HOG + GCLM + LBP
+        # MinMaxScaler
+        # Accuracy: 0.53
 
-        # Mejores parámetros: {'C': 10, 'coef0': 0.0, 'gamma': 'scale', 'kernel': 'sigmoid'}
-        # Precisión del modelo SVM con características HOG: 0.5733333333333334
-        # Tiempo de ejecución: 5213.716243505478 segundos (1h 26m 54s)
+        # HOG + GLCM + LBP
+        # Sin estandarizar
+        # Accuracy: 0.353333333
